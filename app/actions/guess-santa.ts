@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { Database } from '@/types/database.types'
 
 export async function attemptGuess(groupId: string, suspectId: string, scannedQrToken: string) {
   const supabase = await createClient()
@@ -15,9 +16,12 @@ export async function attemptGuess(groupId: string, suspectId: string, scannedQr
       .from('profiles')
       .select('qr_token')
       .eq('id', suspectId)
+      .eq('id', suspectId)
       .single()
+    
+    const profileData = suspectProfile as { qr_token: string | null } | null
 
-    if (!suspectProfile || suspectProfile.qr_token !== scannedQrToken) {
+    if (!profileData || profileData.qr_token !== scannedQrToken) {
       throw new Error('Invalid QR code')
     }
 
@@ -26,7 +30,7 @@ export async function attemptGuess(groupId: string, suspectId: string, scannedQr
       .rpc('attempt_guess', {
         group_id_input: groupId,
         suspect_id: suspectId
-      })
+      } as any)
 
     if (rpcError) throw rpcError
 
@@ -37,12 +41,15 @@ export async function attemptGuess(groupId: string, suspectId: string, scannedQr
         .select('lives')
         .eq('group_id', groupId)
         .eq('user_id', user.id)
+        .eq('user_id', user.id)
         .single()
+      
+      const participantData = participant as { lives: number | null } | null
 
-      if (participant && participant.lives > 0) {
-        await supabase
-          .from('participants')
-          .update({ lives: participant.lives - 1 })
+      if (participantData && (participantData.lives ?? 0) > 0) {
+        await (supabase
+          .from('participants') as any)
+          .update({ lives: (participantData.lives ?? 0) - 1 } as any)
           .eq('group_id', groupId)
           .eq('user_id', user.id)
       }

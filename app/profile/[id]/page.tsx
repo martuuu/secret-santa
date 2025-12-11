@@ -1,6 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { ProfileClient } from './ProfileClient'
+import { Database } from '@/types/database.types'
+
+type Profile = Database['public']['Tables']['profiles']['Row']
+type WishlistItem = Database['public']['Tables']['wishlist_items']['Row']
 
 export default async function ProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params

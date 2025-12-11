@@ -8,7 +8,11 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
+import { nanoid } from 'nanoid'
 import Link from 'next/link'
+import { Database } from '@/types/database.types'
+
+type Group = Database['public']['Tables']['groups']['Row']
 
 export default function CreateGroupPage() {
   const [groupName, setGroupName] = useState('')
@@ -33,19 +37,22 @@ export default function CreateGroupPage() {
         throw new Error('No user found')
       }
 
-      const { data: group, error } = await supabase
-        .from('groups')
+      const { data: group, error } = await (supabase
+        .from('groups') as any)
         .insert([{
           name: groupName.trim(),
           admin_id: user.id,
+          invite_code: nanoid(10) // Generate 10-char safe ID
         }])
         .select()
-        .single()
+        .single() // returns() removed, we'll trust any casted result
 
       if (error) throw error
 
       toast.success('¡Grupo creado exitosamente!')
-      router.push(`/dashboard/group/${group.id}`)
+      if (group) {
+        router.push(`/dashboard/group/${group.id}`)
+      }
       router.refresh()
     } catch (error: any) {
       toast.error(error.message || 'Error al crear el grupo')

@@ -4,6 +4,12 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Plus } from 'lucide-react'
+import { Database } from '@/types/database.types'
+
+type Group = Database['public']['Tables']['groups']['Row']
+type ParticipantWithGroup = Database['public']['Tables']['participants']['Row'] & {
+  groups: Group | null
+}
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -40,8 +46,9 @@ export default async function DashboardPage() {
       groups (*)
     `)
     .eq('user_id', user.id)
+    .returns<ParticipantWithGroup[]>()
 
-  const participantGroups = participantData?.map(p => p.groups).filter(Boolean) || []
+  const participantGroups = participantData?.map((p) => p.groups).filter((g): g is Group => !!g) || []
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-red-950 to-slate-900 p-4 md:p-8">
@@ -49,7 +56,7 @@ export default async function DashboardPage() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-red-500 to-yellow-400 bg-clip-text text-transparent">
-              ¡Hola, {profile.username}! 🎅
+              ¡Hola, {(profile as any)?.username}! 🎅
             </h1>
             <p className="text-slate-400 mt-2">Tus eventos de Secret Santa</p>
           </div>
@@ -121,7 +128,7 @@ export default async function DashboardPage() {
             <Card className="border-red-900/20 bg-slate-900/50 backdrop-blur">
               <CardContent className="flex flex-col items-center justify-center py-16">
                 <div className="text-6xl mb-4">🎁</div>
-                <h3 className="text-xl font-semibold text-slate-300 mb-2">No tienes grupos aún</h3>
+                <h1 className="text-3xl font-bold text-white mb-2">Hola, {(profile as any)?.username || 'Elfo'}! 🎅</h1>
                 <p className="text-slate-500 mb-6">Crea tu primer grupo de Secret Santa</p>
                 <Link href="/dashboard/create-group">
                   <Button className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800">

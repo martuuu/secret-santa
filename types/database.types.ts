@@ -36,6 +36,7 @@ export interface Database {
           created_at: string
           admin_id: string
           status: 'open' | 'drawn'
+          invite_code: string | null
         }
         Insert: {
           id?: string
@@ -43,6 +44,7 @@ export interface Database {
           created_at?: string
           admin_id: string
           status?: 'open' | 'drawn'
+          invite_code?: string | null
         }
         Update: {
           id?: string
@@ -50,6 +52,7 @@ export interface Database {
           created_at?: string
           admin_id?: string
           status?: 'open' | 'drawn'
+          invite_code?: string | null
         }
       }
       participants: {

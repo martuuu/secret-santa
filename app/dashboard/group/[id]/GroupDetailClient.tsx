@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { toast } from 'sonner'
 import { performDraw, addParticipant } from './actions'
 import { GifteeRevealCard } from '@/components/santa/GifteeRevealCard'
+import { InviteLink } from '@/components/santa/InviteLink'
 import { Sparkles, UserPlus, Users } from 'lucide-react'
 
 interface Props {
@@ -20,9 +21,18 @@ interface Props {
   isAdmin: boolean
   isParticipant: boolean
   currentUserId: string
+  myLives: number
 }
 
-export function GroupDetailClient({ group, participants, myMatch, isAdmin, isParticipant, currentUserId }: Props) {
+export function GroupDetailClient({ 
+  group, 
+  participants, 
+  myMatch, 
+  isAdmin, 
+  isParticipant, 
+  currentUserId,
+  myLives
+}: Props) {
   const [loading, setLoading] = useState(false)
   const [newUsername, setNewUsername] = useState('')
   const router = useRouter()
@@ -176,12 +186,17 @@ export function GroupDetailClient({ group, participants, myMatch, isAdmin, isPar
                 {group.status === 'open' && participants.length >= 2 && (
                   <Button
                     onClick={handleDraw}
-                    disabled={loading}
-                    className="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-700 hover:to-yellow-800"
-                  >
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    {loading ? 'Realizando sorteo...' : 'Realizar Sorteo'}
-                  </Button>
+                    disabled={loading || participants.length < 2}
+                  className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800"
+                >
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  {loading ? 'Realizando sorteo...' : 'Realizar Sorteo'}
+                </Button>
+                )}
+                
+                {/* Invite Link System */}
+                {group.status === 'open' && (
+                  <InviteLink code={group.invite_code} />
                 )}
 
                 {participants.length < 2 && group.status === 'open' && (

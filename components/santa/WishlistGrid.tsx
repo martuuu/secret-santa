@@ -8,6 +8,9 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Plus, Trash2, ExternalLink } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
+import { Database } from '@/types/database.types'
+
+type WishlistInsert = Database['public']['Tables']['wishlist_items']['Insert']
 
 interface WishlistItem {
   id: string
@@ -40,13 +43,13 @@ export function WishlistGrid({ items, isOwner, userId }: Props) {
     setLoading(true)
 
     try {
-      const { error } = await supabase
-        .from('wishlist_items')
+      const { error } = await (supabase
+        .from('wishlist_items') as any)
         .insert([{
           user_id: userId,
           title: newTitle.trim(),
           url: newUrl.trim() || null,
-        }])
+        } as WishlistInsert])
 
       if (error) throw error
 

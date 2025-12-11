@@ -8,6 +8,9 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
+import { Database } from '@/types/database.types'
+
+type ProfileInsert = Database['public']['Tables']['profiles']['Insert']
 
 export default function SetupProfilePage() {
   const [username, setUsername] = useState('')
@@ -32,12 +35,12 @@ export default function SetupProfilePage() {
         throw new Error('No user found')
       }
 
-      const { error } = await supabase
-        .from('profiles')
+      const { error } = await (supabase
+        .from('profiles') as any)
         .insert([{
           id: user.id,
           username: username.trim(),
-        }])
+        } as ProfileInsert])
 
       if (error) {
         if (error.code === '23505') {

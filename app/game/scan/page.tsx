@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -13,8 +13,15 @@ import { ArrowLeft, Trophy, XCircle } from 'lucide-react'
 import Confetti from 'react-confetti'
 import { useWindowSize } from '@/lib/hooks/useWindowSize'
 import { createClient } from '@/lib/supabase/client'
+import { Database } from '@/types/database.types'
 
-export default function ScanPage() {
+type Group = Database['public']['Tables']['groups']['Row']
+type ParticipantWithGroup = {
+  group_id: string
+  groups: Group | null
+}
+
+function ScanPageContent() {
   const searchParams = useSearchParams()
   const suspectId = searchParams.get('suspect')
   const [groupId, setGroupId] = useState('')
@@ -42,9 +49,10 @@ export default function ScanPage() {
           )
         `)
         .eq('user_id', user.id)
+        .returns<ParticipantWithGroup[]>()
 
-      const groupsList = participantData?.map(p => p.groups).filter(g => g?.status === 'drawn') || []
-      setGroups(groupsList as any[])
+      const groupsList = participantData?.map((p) => p.groups).filter((g): g is Group => g?.status === 'drawn') || []
+      setGroups(groupsList)
       
       if (groupsList.length === 1) {
         setGroupId(groupsList[0]?.id || '')
@@ -200,5 +208,17 @@ export default function ScanPage() {
         </Card>
       </div>
     </div>
+  )
+}
+
+export default function ScanPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-red-950 to-slate-900 flex items-center justify-center">
+        <div className="text-slate-400">Cargando...</div>
+      </div>
+    }>
+      <ScanPageContent />
+    </Suspense>
   )
 }
